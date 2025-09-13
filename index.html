@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Dual Story — EN↔TR Click-Translate</title>
+<style>
+  :root{
+    --fg:#eaf0f6; --muted:#9fb2c7;
+    --card:#10151b; --card-alpha:0.62;   /* önce: 0.78 */
+    --bubble:#0f172a; --bubble-b:#334155;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+
+  body{
+    margin:0; color:var(--fg);
+    font:17px/1.75 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial,sans-serif;
+  }
+
+  /* Sabit arka plan katmanı (mobilde sorunsuz) */
+  .bg{
+    position:fixed; inset:0; z-index:-1;
+    background:url("camp-bg.jpg") center/cover no-repeat;
+  }
+  .bg::after{
+    content:""; position:absolute; inset:0;
+    /* önce: rgba(...,.66) → daha şeffaf */
+    background:linear-gradient(180deg, rgba(7,11,16,.52), rgba(7,11,16,.52));
+  }
+
+  .wrap{max-width:900px;margin:32px auto;padding:20px}
+  @media (max-width:700px){
+    .wrap{margin: max(16px, env(safe-area-inset-top)) auto 20px; padding:14px}
+  }
+
+  .card{
+    position:relative; border:1px solid rgba(255,255,255,.06);
+    border-radius:18px; padding:26px 24px;
+    background:rgba(16,21,27,var(--card-alpha));
+    box-shadow:0 18px 40px rgba(0,0,0,.45); backdrop-filter: blur(3px);
+    margin-bottom:18px;
+  }
+
+  /* Kart içi hafif filigran — daha şeffaf */
+  .card::before{
+    content:""; position:absolute; inset:0; z-index:0; pointer-events:none;
+    background:url("camp-bg.jpg") center/contain no-repeat;
+    opacity:.035; /* önce: .08 */
+    filter:grayscale(30%) saturate(80%);
+  }
+
+  h2{margin:0 0 10px 0; font-size:20px; color:#d9e6ff; position:relative; z-index:1}
+  .hint{ color:var(--muted); font-size:13px; margin:6px 0 10px; position:relative; z-index:1 }
+  .story{ position:relative; z-index:1; white-space:pre-wrap; font-size:18px }
+  @media (max-width:700px){ .story{ font-size:16px } }
+
+  .word{ cursor:pointer; border-radius:8px; padding:1px 3px; margin:0 .5px; display:inline }
+  .word:hover{ background:rgba(255,255,255,.10) }
+
+  /* Sağ üst baloncuk (çentik güvenli alanı ile) */
+  #bubble{
+    position:fixed;
+    top: calc(12px + env(safe-area-inset-top));
+    right: calc(12px + env(safe-area-inset-right));
+    z-index:9999;
+    min-width:220px; max-width:460px; background:var(--bubble);
+    border:1px solid var(--bubble-b); border-radius:12px; padding:10px 12px;
+    color:#e5edf7; box-shadow:0 12px 34px rgba(0,0,0,.55); display:none;
+  }
+  #bubble b{ color:#cfe0ff }
+
+  /* Mobilde okunabilirliği azıcık korumak için degrade çok az koyulaştırıldı (yine eskisinden şeffaf): */
+  @media (max-width:700px){
+    .bg::after{
+      background:linear-gradient(180deg, rgba(7,11,16,.56), rgba(7,11,16,.56));
+    }
+    :root{ --card-alpha:0.60; } /* kart biraz daha şeffaf */
+  }
+</style>
+</head>
+<body>
+  <div class="bg"></div>
+  <div id="bubble"></div>
+
+  <div class="wrap">
+    <div class="card">
+      <h2>English Story (click a word → Turkish)</h2>
+      <div class="hint">Click any word; translation appears in the top-right bubble for 5s.</div>
+      <div id="storyEN" class="story"></div>
+    </div>
+
+    <div class="card">
+      <h2>Türkçe Hikâye (kelimeye tıkla → İngilizcesi)</h2>
+      <div class="hint">Her kelime tıklanabilir; çeviri sağ üst baloncukta 5 sn görünür.</div>
+      <div id="storyTR" class="story"></div>
+    </div>
+  </div>
+
+<script>
+/* ——— EN story ——— */
+const STORY_EN = `Dear Diary,
+The school year had begun with the heartwarming sun of spring. That weekend, our teacher Banu planned a school trip. On this trip, she was going to take our class to the forest for camping. We were eagerly waiting for the weekend with our friends. Teacher Banu told us she had a surprise for us at the camp, and after getting on the buses, we set off toward the campsite.
+
+When we arrived at the campsite, all the students pitched their tents in groups of seven. Teacher Banu assigned different tasks: some students collected wood for the campfire, others prepared the food, while we helped set up the tents.
+
+After completing all these tasks with my friends, Teacher Banu told us she would reveal her surprise in the morning. We were very curious. That evening, we lit a big campfire, told stories, and had dinner. From a clearing in the forest, we watched the stars and the moon. Tired from the day, we went to our tents and fell asleep.
+
+In the morning, we were suddenly awakened by a scream. When we rushed outside, we saw that Teacher Banu’s tent was a mess. We ran to the tent, but neither Banu nor any trace of her was there...
+
+We started searching for her in groups. About 10 minutes later, we found a note on a tree. The note said “The fastest one wins,” and on the back, there was a strange math problem and a map. Clearly, Teacher Banu wanted to see which group would find her first—she had organized a competition related to our lessons. The other groups also found the same note. Without knowing about each other, everyone solved the problem. Three different clues appeared, each related to a different subject. When we answered the questions correctly, we marked the resulting coordinates on the map, and they formed an equilateral triangle. We thought Teacher Banu might be at the exact center of this triangle, so we quickly went to the middle point on the map.
+
+At that very moment, the other groups arrived too. The coordinates pointed to a cave. Carefully, the whole class went inside, and suddenly, Teacher Banu appeared in front of us. She congratulated us, and we all walked back to the campsite joking and laughing. Our day was so much fun. And so, this crazy school memory added color to my life.`;
+
+/* ——— TR story (senden) ——— */
+const STORY_TR = `Sevgili Günlük;
+Bahar ayının kalpleri ısıtan güneşi ile okul başlamıştı. Banu öğretmen o hafta sonu bir okul gezisi planladı. Bu okul gezisinde bizim sınıfımızı ormana kamp yapmaya götürecekti. Arkadaşlarımızla hafta sonunu sabırsızlıkla bekliyorduk. Banu öğretmen bize kampta bir sürprizinin olduğunu söyledi ve servis araçlarına bindikten sonra kampa doğru  yola koyulduk.
+Kamp alanına vardıklarında tüm öğrenciler 7 kişilik gruplar halinde kalacakları çadırları kurdu. Banu öğretmen görev ayrımı yaptı bazı öğrenciler kamp ateşi için odun topladılar bazıları yiyecekleri hazırladılar biz ise çadırları kurmaya yardım ettik.
+Arkadaşlarımla tüm bu görevleri yaptıktan sonra Banu öğretmen sabah bize sürprizini açıklayacağını söyledi. Sürprizi çok merak ediyorduk. Akşam kocaman bir kamp ateşi yaktık. Hikayeler anlattık ve yemek yedik. Ormanın ortasındaki açıklıktan yıldızları ve ayı seyrettik. Günün yorgunluğuyla çadırlara gidip uykuya daldık. 
+Sabah olduğunda aniden bir çığlık sesiyle uykumuzdan uyandık. Çadırlardan dışarı çıktığımızda Banu öğretmenin çadırının darmadağın olduğunu gördük. Hemen çadıra koştuk fakat çadırda ne Banu öğretmen vardı ne de Banu öğretmenden bir iz...
+Banu öğretmeni gruplar halinde aramaya koyulduk. Yaklaşık 10 dakika sonra ağacın üstünde bir not bulduk. Notta hızlı olan kazanır yazıyordu, arkasında da garip bir matematik işlemi ve bir harita vardı, belli ki Banu öğretmen gruplardan hangisinin onu daha önce bulacağını merak ediyordu, bunun içinde derslerle alakalı bir yarışma düzenlemişti. Aynı notu diğer gruplarda bulmuşlardı. Herkes birbirinden habersiz problemi çözdü. Karşımıza 3 farklı ipucu çıktı. Bu üç ipucunun her biri farklı derslerle ilgiliydi. Soruları doğru cevapladığımızda oluşan koordinatları haritada işaretledik ve ortaya bir eşkenar üçgen çıktı. Banu öğretmenin bu üçgenin tam orta noktasında olabileceğini düşündük ve hızlıca haritanın orta noktasındaki alana gittik. Diğer gruplar da tam bizimle aynı zamanda gelmişlerdi. Koordinatlarını gösterdiği yer bir mağaraydı. Tüm sınıfla dikkatlice içeri doğru girdik ve birden karşımıza Banu öğretmen çıktı. Bizi tebrik etti ve kamp alanına doğru şakalaşarak ilerledik. Günümüz çok eğlenceli geçti. Böylece bu çılgınca okul anım hayatıma renk kattı.`;
+
+/* ——— EN→TR sözlük (önceki sürümden) ——— */
+const DICT_EN_TR = {
+  "dear":"sevgili","diary":"günlük","the":"(belirli artikel)","school":"okul","year":"yıl",
+  "had":"-mişti","begun":"başladı","with":"ile","heartwarming":"iç ısıtan","sun":"güneş",
+  "of":"-ın/-in","spring":"ilkbahar","that":"o/şu","weekend":"hafta sonu","our":"bizim",
+  "teacher":"öğretmen","banu":"Banu","planned":"planladı","a":"bir","trip":"gezi","on":"-de/-da",
+  "this":"bu","she":"o (kadın)","was":"idi","going":"gitmek üzere","to":"-e/-a","take":"götürmek",
+  "class":"sınıf","forest":"orman","for":"için","camping":"kamp yapmak","we":"biz","were":"idik",
+  "eagerly":"hevesle","waiting":"bekliyorduk","friends":"arkadaşlar","told":"söyledi","us":"bize/bizi",
+  "surprise":"sürpriz","at":"-de/-da","camp":"kamp","after":"sonra","getting":"binmek",
+  "buses":"otobüsler","set":"yola çıktı","off":"-den/-dan","toward":"doğru","campsite":"kamp alanı",
+  "when":"-dığında","arrived":"vardık","all":"tüm","students":"öğrenciler","pitched":"kurdu",
+  "their":"onların","tents":"çadırlar","in":"içinde","groups":"gruplar","seven":"yedi","assigned":"atadı",
+  "different":"farklı","tasks":"görevler","some":"bazı","collected":"topladı","wood":"odun",
+  "campfire":"kamp ateşi","others":"diğerleri","prepared":"hazırladı","food":"yemek","while":"iken",
+  "helped":"yardım etti","set":"kurmak","up":"kurmak","completing":"tamamlamak","these":"bunlar",
+  "my":"benim","would":"-cekti","reveal":"açıklamak","her":"onun/onu","morning":"sabah","very":"çok",
+  "curious":"meraklı","evening":"akşam","lit":"yaktık","big":"büyük","stories":"hikâyeler","and":"ve",
+  "dinner":"akşam yemeği","from":"-den/-dan","clearing":"açıklık","watched":"izledik","stars":"yıldızlar",
+  "moon":"ay","tired":"yorgun","day":"gün","went":"gittik","fell":"düştük","asleep":"uykuya",
+  "suddenly":"aniden","awakened":"uyandırıldık","by":"tarafından","scream":"çığlık","rushed":"koştuk",
+  "outside":"dışarı","saw":"gördük","banu’s":"Banu’nun","tent":"çadır","mess":"dağınıklık",
+  "ran":"koştuk","but":"ama","neither":"ne","nor":"ne de","any":"herhangi bir","trace":"iz",
+  "there":"orada","started":"başladık","searching":"aramak","about":"yaklaşık","minutes":"dakika",
+  "later":"sonra","found":"bulduk","note":"not","tree":"ağaç","said":"dedi","fastest":"en hızlı",
+  "one":"biri","wins":"kazanır","back":"arka/geri","strange":"garip","math":"matematik",
+  "problem":"problem","map":"harita","clearly":"açıkça","wanted":"istedi","see":"görmek",
+  "which":"hangi","group":"grup","find":"bulmak","first":"ilk","organized":"düzenledi",
+  "competition":"yarışma","related":"ilgili","lessons":"dersler","other":"diğer","also":"ayrıca/da",
+  "same":"aynı","without":"olmadan","knowing":"bilmeden","each":"her","everyone":"herkes",
+  "solved":"çözdü","three":"üç","clues":"ipuçları","appeared":"göründü/ortaya çıktı",
+  "subject":"konu","answered":"cevapladık","questions":"sorular","correctly":"doğru şekilde",
+  "marked":"işaretledik","resulting":"ortaya çıkan","coordinates":"koordinatlar","they":"onlar",
+  "formed":"oluşturdu","an":"bir","equilateral":"eşkenar","triangle":"üçgen","thought":"düşündük",
+  "might":"olabilir","be":"olmak","exact":"tam","center":"merkez","so":"bu yüzden",
+  "quickly":"hızlıca","middle":"orta","point":"nokta","at":"-de/-da","very":"çok","moment":"an",
+  "arrived":"geldi","too":"da","pointed":"işaret etti","cave":"mağara","carefully":"dikkatlice",
+  "whole":"tüm","class":"sınıf","inside":"içeri","front":"ön","of":"-ın/-in","appeared":"göründü",
+  "us":"bize/bizi","she":"o (kadın)","congratulated":"tebrik etti","walked":"yürüdük","all":"hepimiz",
+  "joking":"şakalaşarak","laughing":"gülerek","much":"çok","fun":"eğlenceli","this":"bu","crazy":"çılgın",
+  "memory":"anı","added":"ekledi","color":"renk","to":"-e/-a","my":"benim","life":"hayat"
+};
+
+/* ——— EN→TR sözlüğü tersine çevir (TR→EN tabanı) ——— */
+const REVERSED_TR_EN = {};
+for (const [en, tr] of Object.entries(DICT_EN_TR)) {
+  const key = tr.toLocaleLowerCase('tr-TR');
+  // Birden fazla EN aynı TR'ye düşerse, ilkini koru
+  if (!(key in REVERSED_TR_EN)) REVERSED_TR_EN[key] = en;
+}
+
+/* ——— TR→EN ekstra sözlük (senin TR metnine özel eklemeler) ——— */
+const TR_EXTRA_EN = {
+  "sevgili":"dear","günlük":"diary","bahar":"spring","ayının":"month's","kalpleri":"hearts",
+  "ısıtan":"heartwarming","güneşi":"sun","ile":"with","okul":"school","başlamıştı":"had begun",
+  "öğretmen":"teacher","hafta":"week","sonu":"end","okul":"school","gezisi":"trip","bu":"this",
+  "gezisinde":"on this trip","bizim":"our","sınıfımızı":"class","sınıf":"class","ormana":"to the forest",
+  "kamp":"camp","yapmaya":"to do","götürecekti":"was going to take","arkadaşlarımızla":"with our friends",
+  "hafta":"week","sonunu":"weekend","sabırsızlıkla":"eagerly","bekliyorduk":"were waiting","bize":"us",
+  "kampta":"at the camp","sürprizinin":"surprise","olduğunu":"that","söyledi":"told","servis":"bus",
+  "araçlarına":"buses","bindikten":"after getting on","sonra":"after","kampa":"to the camp","doğru":"toward",
+  "yola":"road","koyulduk":"set off","kamp":"camp","alanına":"site","vardıklarında":"when (they) arrived",
+  "tüm":"all","öğrenciler":"students","kişilik":"person","gruplar":"groups","halinde":"in","kalacakları":"they would stay",
+  "çadırları":"tents","kurdu":"pitched","görev":"task","ayrımı":"division","yaptı":"did/assigned",
+  "bazı":"some","odun":"wood","topladılar":"collected","yiyecekleri":"the food","hazırladılar":"prepared",
+  "biz":"we","ise":"while/whereas","kurmaya":"to set up","yardım":"help","ettik":"helped","arkadaşlarımla":"with my friends",
+  "tüm":"all","görevleri":"tasks","yaptıktan":"after doing","sabah":"morning","açıklayacağını":"would reveal",
+  "çok":"very","merak":"curiosity","ediyorduk":"we were (curious)","akşam":"evening","kocaman":"big",
+  "yaktık":"lit","hikayeler":"stories","anlattık":"told","yemek":"dinner/food","yedik":"ate",
+  "ormanın":"of the forest","ortasındaki":"in the middle","açıklıktan":"from the clearing","yıldızları":"the stars",
+  "ve":"and","ayı":"the moon","seyrettik":"watched","günün":"of the day","yorgunluğuyla":"with tiredness",
+  "çadırlara":"to the tents","gidip":"going","uykuya":"to sleep","daldık":"fell (asleep)",
+  "sabah":"morning","olduğunda":"when","aniden":"suddenly","bir":"a","çığlık":"scream","sesiyle":"with the sound",
+  "uykumuzdan":"from our sleep","uyandık":"awoke","çadırlardan":"from the tents","dışarı":"outside",
+  "çıktığımızda":"when we went out","öğretmenin":"teacher's","çadırının":"(her) tent's","darmadağın":"a mess",
+  "olduğunu":"that it was","gördük":"we saw","hemen":"immediately","çadıra":"to the tent","koştuk":"ran",
+  "fakat":"but","çadırda":"in the tent","ne":"neither","vardı":"was there","de":"nor","öğretmenden":"from the teacher",
+  "bir":"a","iz":"trace","öğretmeni":"the teacher (obj)","aramaya":"to search","koyulduk":"we set out",
+  "yaklaşık":"about","dakika":"minutes","sonra":"later","ağacın":"of the tree","üstünde":"on","not":"note","bulduk":"found",
+  "notta":"on the note","hızlı":"fast","olan":"the one","kazanır":"wins","yazıyordu":"was written",
+  "arkasında":"on the back","garip":"strange","matematik":"math","işlemi":"problem","harita":"map",
+  "vardı":"there was","belli ki":"clearly","gruplardan":"from the groups","hangisinin":"which one","onu":"her",
+  "daha":"more/earlier","önce":"before","bulacağını":"would find","merak":"curiosity","ediyordu":"(she) wondered",
+  "bunun":"for this","içinde":"in","derslerle":"with the lessons","alakalı":"related","yarışma":"competition",
+  "düzenlemişti":"had organized","aynı":"same","diğer":"other","gruplarda":"in groups","bulmuşlardı":"had found",
+  "herkes":"everyone","birbirinden":"from each other","habersiz":"without knowing","problemi":"the problem",
+  "çözdü":"solved","karşımıza":"to us/appeared","farklı":"different","ipucu":"clue","çıktı":"appeared",
+  "üç":"three","bu":"this","her":"each","biri":"one","ilgiliydi":"was related","soruları":"the questions",
+  "doğru":"correctly","cevapladığımızda":"when we answered","oluşan":"resulting","koordinatları":"coordinates",
+  "haritada":"on the map","işaretledik":"marked","ve":"and","ortaya":"forth","bir":"an","eşkenar":"equilateral",
+  "üçgen":"triangle","çıktı":"turned out","öğretmenin":"teacher's","tam":"exact","orta":"middle","noktasında":"at the point",
+  "olabileceğini":"might be","düşündük":"we thought","hızlıca":"quickly","haritanın":"of the map",
+  "alanına":"area","gittik":"went","diğer":"other","gruplar":"groups","da":"too","tam":"exactly",
+  "bizimle":"with us","aynı":"same","zamanda":"time","gelmişlerdi":"had arrived","koordinatlarını":"its coordinates",
+  "gösterdiği":"that showed","yer":"place","mağaraydı":"was a cave","tüm":"whole","sınıfla":"with the class",
+  "dikkatlice":"carefully","içeri":"inside","doğru":"toward","girdik":"entered","birden":"suddenly",
+  "karşımıza":"in front of us","çıktı":"appeared","bizi":"us","tebrik":"congratulate","etti":"did",
+  "kamp":"camp","alanına":"to the site","doğru":"toward","şakalaşarak":"joking","ilerledik":"we walked",
+  "günümüz":"our day","çok":"very","eğlenceli":"fun","geçti":"passed","böylece":"thus","bu":"this",
+  "çılgınca":"crazy","okul":"school","anım":"memory","hayatıma":"to my life","renk":"color","kattı":"added"
+};
+
+/* ——— Türkçe temel normalize + basit ek-çıkarma (tek adımlı kök bulma) ——— */
+const TR_SUFFIXES = [
+  "larımız","lerimiz","larımızı","lerimizi","larımızda","lerimizde",
+  "ımız","imiz","umuz","ümüz","nız","niz","nuz","nüz",
+  "ları","leri","ların","lerin","lara","lere","larda","lerde","lardan","lerden",
+  "daki","deki","taki","teki",
+  "dan","den","tan","ten","da","de","ta","te",
+  "ını","ini","unu","ünü","yı","yi","yu","yü","ı","i","u","ü",
+  "ya","ye","a","e",
+  "m","n","miz","nız","muz","nuz",
+  "lar","ler","ın","in","un","ün"
+].sort((a,b)=>b.length-a.length); // uzun olanları önce dene
+
+function trNormalize(word){
+  let w = word.replace(/[’']/g,"'").toLocaleLowerCase('tr-TR');
+  // tek aşamalı ek soyma
+  for (const suf of TR_SUFFIXES){
+    if (w.endsWith(suf) && w.length>suf.length+1){ // kökü çok küçültme
+      w = w.slice(0, -suf.length);
+      break;
+    }
+  }
+  return w;
+}
+
+/* ——— TR→EN çeviri bul ——— */
+function trToEn(word){
+  const orig = word;
+  const w = trNormalize(word);
+  // 1) özel TR ekstra
+  if (TR_EXTRA_EN[w]) return TR_EXTRA_EN[w];
+  // 2) ters sözlükten (EN→TR tersine çevrilmiş)
+  if (REVERSED_TR_EN[w]) return REVERSED_TR_EN[w];
+  // 3) orijinal (normalize etmeden) dene
+  const w0 = word.toLocaleLowerCase('tr-TR');
+  if (TR_EXTRA_EN[w0]) return TR_EXTRA_EN[w0];
+  if (REVERSED_TR_EN[w0]) return REVERSED_TR_EN[w0];
+  return "(no match)";
+}
+
+/* ——— EN→TR çeviri ——— */
+function enToTr(word){
+  const key = word.toLowerCase();
+  return DICT_EN_TR[key] || "(sözlükte yok)";
+}
+
+/* ——— Metni güvenli şekilde token’lara böl (Unicode harfleri) ——— */
+function renderStory(text, container, translator){
+  container.innerHTML = '';
+  const isWordChar = ch => /[\p{L}'’]/u.test(ch); // tüm dillerin harfleri + apostrof
+  let buf = '';
+  for (let i=0;i<text.length;i++){
+    const ch = text[i];
+    if (isWordChar(ch)){ buf += ch; }
+    else{
+      if (buf){ addWord(buf, container, translator); buf=''; }
+      container.append(document.createTextNode(ch)); // boşluk/noktalama
+    }
+  }
+  if (buf) addWord(buf, container, translator);
+}
+
+const bubbleEl = document.getElementById('bubble');
+
+function addWord(word, container, translator){
+  const span = document.createElement('span');
+  span.className = 'word';
+  span.textContent = word;
+  span.addEventListener('click', ()=>{
+    const tr = translator(word);
+    bubbleEl.innerHTML = `<b>${word}</b> → ${tr}`;
+    bubbleEl.style.display = 'block';
+    clearTimeout(addWord._t);
+    addWord._t = setTimeout(()=>{ bubbleEl.style.display='none'; }, 5000);
+  });
+  container.append(span);
+}
+
+/* ——— Render her iki hikâye ——— */
+renderStory(STORY_EN, document.getElementById('storyEN'), enToTr);
+renderStory(STORY_TR, document.getElementById('storyTR'), trToEn);
+</script>
+</body>
+</html>
